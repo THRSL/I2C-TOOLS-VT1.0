@@ -28,7 +28,7 @@
 #include <unistd.h>
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
-#include <i2c/smbus.h>
+#include "smbus.h"
 #include "i2cbusses.h"
 #include "../version.h"
 
@@ -368,22 +368,19 @@ int main(int argc, char *argv[])
 	if (!yes) {
 		char s[2];
 
-		fprintf(stderr, "WARNING! This program can confuse your I2C "
-			"bus, cause data loss and worse!\n");
+		fprintf(stderr, "\n");
 
-		fprintf(stderr, "I will probe file %s%s.\n", filename,
-			mode==MODE_QUICK?" using quick write commands":
-			mode==MODE_READ?" using receive byte commands":"");
-		fprintf(stderr, "I will probe address range 0x%02x-0x%02x.\n",
-			first, last);
-
+		fprintf(stderr, "I2C Device=%s%s\n \n", filename,
+			mode==MODE_QUICK?" \n ":
+			mode==MODE_READ?" ":"");
+        /*
 		fprintf(stderr, "Continue? [Y/n] ");
 		fflush(stderr);
 		if (!fgets(s, 2, stdin)
 		 || (s[0] != '\n' && s[0] != 'y' && s[0] != 'Y')) {
 			fprintf(stderr, "Aborting on user request.\n");
 			exit(0);
-		}
+		} */
 	}
 
 	res = scan_i2c_bus(file, mode, funcs, first, last);

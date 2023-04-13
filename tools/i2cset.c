@@ -28,7 +28,7 @@
 #include <unistd.h>
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
-#include <i2c/smbus.h>
+#include "smbus.h"
 #include "i2cbusses.h"
 #include "util.h"
 #include "../version.h"
@@ -113,8 +113,7 @@ static int confirm(const char *filename, int address, int size, int daddress,
 {
 	int dont = 0;
 
-	fprintf(stderr, "WARNING! This program can confuse your I2C "
-		"bus, cause data loss and worse!\n");
+	fprintf(stderr, "");
 
 	if (address >= 0x50 && address <= 0x57) {
 		fprintf(stderr, "DANGEROUS! Writing to a serial "
@@ -124,32 +123,32 @@ static int confirm(const char *filename, int address, int size, int daddress,
 		dont++;
 	}
 
-	fprintf(stderr, "I will write to device file %s, chip address "
-		"0x%02x,\n", filename, address);
+	fprintf(stderr, "I2C_BUS-%s,  CHIP_ADD-"
+		"0x%02x ", filename, address);
 	if (size != I2C_SMBUS_BYTE)
-		fprintf(stderr, "data address 0x%02x, ", daddress);
+		fprintf(stderr, "REG_ADDR-0x%02x <--WRITING--> ", daddress);
 	if (size == I2C_SMBUS_BLOCK_DATA ||
 	    size == I2C_SMBUS_I2C_BLOCK_DATA) {
 		int i;
 
-		fprintf(stderr, "data");
+		fprintf(stderr, "WRITE_DATA-");
 		for (i = 0; i < len; i++)
-			fprintf(stderr, " 0x%02x", block[i]);
-		fprintf(stderr, ", mode %s.\n", size == I2C_SMBUS_BLOCK_DATA
+			fprintf(stderr, "0x%02x", block[i]);
+		fprintf(stderr, " %s.\n", size == I2C_SMBUS_BLOCK_DATA
 			? "smbus block" : "i2c block");
 	} else
-		fprintf(stderr, "data 0x%02x%s, mode %s.\n", value,
+		fprintf(stderr, "WRITE_DATA-0x%02x%s %s\n", value,
 			vmask ? " (masked)" : "",
-			size == I2C_SMBUS_WORD_DATA ? "word" : "byte");
+			size == I2C_SMBUS_WORD_DATA ? "WORD" : "BYTE");
 	if (pec)
 		fprintf(stderr, "PEC checking enabled.\n");
 
-	fprintf(stderr, "Continue? [%s] ", dont ? "y/N" : "Y/n");
+	/*fprintf(stderr, "Continue? [%s] ", dont ? "y/N" : "Y/n");
 	fflush(stderr);
 	if (!user_ack(!dont)) {
 		fprintf(stderr, "Aborting on user request.\n");
 		return 0;
-	}
+	}*/
 
 	return 1;
 }

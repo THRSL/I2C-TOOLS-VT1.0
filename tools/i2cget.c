@@ -31,7 +31,7 @@
 #include <unistd.h>
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
-#include <i2c/smbus.h>
+#include "smbus.h"
 #include "i2cbusses.h"
 #include "util.h"
 #include "../version.h"
@@ -123,8 +123,7 @@ static int confirm(const char *filename, int address, int size, int daddress,
 {
 	int dont = 0;
 
-	fprintf(stderr, "WARNING! This program can confuse your I2C "
-		"bus, cause data loss and worse!\n");
+	fprintf(stderr, ""); //WARNING REMOVED
 
 	/* Don't let the user break his/her EEPROMs */
 	if (address >= 0x50 && address <= 0x57 && pec) {
@@ -144,31 +143,31 @@ static int confirm(const char *filename, int address, int size, int daddress,
 		dont++;
 	}
 
-	fprintf(stderr, "I will read from device file %s, chip "
-		"address 0x%02x, ", filename, address);
+	fprintf(stderr, "I2C_BUS-%s,"
+		"  CHIP_ADD-0x%02x " ,filename, address);
 	if (daddress < 0)
 		fprintf(stderr, "current data\naddress");
 	else
-		fprintf(stderr, "data address\n0x%02x", daddress);
+		fprintf(stderr, "REG_ADDR-0x%02x", daddress);
 	if (size == I2C_SMBUS_I2C_BLOCK_DATA)
-		fprintf(stderr, ", %d %s using read I2C block data.\n",
+		fprintf(stderr, "%d %s\n",
 			length, length > 1 ? "bytes" : "byte");
 	else
-		fprintf(stderr, ", using %s.\n",
+		fprintf(stderr, " <--READING--> %s",
 			size == I2C_SMBUS_BYTE ? (daddress < 0 ?
-			"read byte" : "write byte/read byte") :
-			size == I2C_SMBUS_BYTE_DATA ? "read byte data" :
+			"" : "") :
+			size == I2C_SMBUS_BYTE_DATA ? "" :
 			size == I2C_SMBUS_BLOCK_DATA ? "read SMBus block data" :
 			"read word data");
 	if (pec)
 		fprintf(stderr, "PEC checking enabled.\n");
 
-	fprintf(stderr, "Continue? [%s] ", dont ? "y/N" : "Y/n");
+	/*fprintf(stderr, "Continue? [%s] ", dont ? "y/N" : "Y/n");
 	fflush(stderr);
 	if (!user_ack(!dont)) {
 		fprintf(stderr, "Aborting on user request.\n");
 		return 0;
-	}
+	}*/
 
 	return 1;
 }
@@ -308,10 +307,10 @@ int main(int argc, char *argv[])
 		int i;
 
 		for (i = 0; i < res - 1; ++i)
-			printf("0x%02hhx ", block_data[i]);
+			printf("DATA- 0x%02hhx ", block_data[i]);
 		printf("0x%02hhx\n", block_data[res - 1]);
 	} else {
-		printf("0x%0*x\n", size == I2C_SMBUS_WORD_DATA ? 4 : 2, res);
+		printf("DATA-0x%0*x\n", size == I2C_SMBUS_WORD_DATA ? 4 : 2, res);
 	}
 
 	exit(0);
